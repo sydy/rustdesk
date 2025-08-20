@@ -57,6 +57,12 @@ function stateChanged() {
             display: "none",
         };
     }
+    // 在Windows平台上，无论是否全屏都隐藏工具栏
+    if (is_win && !is_file_transfer && !is_port_forward) {
+        $(header).style.set {
+            display: "none",
+        };
+    }
 }
 
 var header;
@@ -517,6 +523,12 @@ if (!(is_file_transfer || is_port_forward)) {
     if (!is_osx) {
         $(div.window-icon).style.set {
             size: "32px",
+        };
+    }
+    // 在Windows平台上初始化时就隐藏工具栏
+    if (is_win) {
+        $(header).style.set {
+            display: "none",
         };
     }
 }
