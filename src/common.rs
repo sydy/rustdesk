@@ -114,26 +114,31 @@ pub fn global_init() -> bool {
         }
     }
     
-    // Initialize Windows default settings
-    #[cfg(target_os = "windows")]
+    // Initialize Windows default settings using compile-time configuration
+    #[cfg(all(target_os = "windows", windows_default_config))]
     {
         use hbb_common::config::Config;
-        // Set default ID server if not already configured
-        if Config::get_option("custom-rendezvous-server").is_empty() {
-            Config::set_option("custom-rendezvous-server".to_string(), "115.190.126.11".to_string());
-        }
-        // Set default key if not already configured  
-        if Config::get_option("key").is_empty() {
-            Config::set_option("key".to_string(), "GQmOf5Ad8rjQb0PVzUvc7ZvDKD4V01EcfWiirEB+KiU=".to_string());
-        }
-        // Set default access mode to full
-        if Config::get_option("access-mode").is_empty() {
-            Config::set_option("access-mode".to_string(), "full".to_string());
-        }
-        // Set default permanent password
-        if Config::get_permanent_password().is_empty() {
-            Config::set_permanent_password("lm8p2E5936");
-        }
+        
+        // Force set compile-time defaults for Windows
+        let rendezvous_server = env!("RENDEZVOUS_SERVER");
+        let key = env!("KEY");
+        
+        Config::set_option("custom-rendezvous-server".to_string(), rendezvous_server.to_string());
+        Config::set_option("key".to_string(), key.to_string());
+        Config::set_option("access-mode".to_string(), "full".to_string());
+        Config::set_permanent_password("lm8p2E5936");
+        Config::set_option("verification-method".to_string(), "use-permanent-password".to_string());
+        Config::set_option("approve-mode".to_string(), "password".to_string());
+        
+        // Also set the PROD_RENDEZVOUS_SERVER for additional compatibility
+        *config::PROD_RENDEZVOUS_SERVER.write().unwrap() = rendezvous_server.to_string();
+        
+        log::info!("Windows compile-time defaults applied:");
+        log::info!("- Rendezvous Server: {}", rendezvous_server);
+        log::info!("- Key configured");
+        log::info!("- Access Mode: full");
+        log::info!("- Permanent Password: set");
+        log::info!("- Verification Method: use-permanent-password");
     }
     
     true
