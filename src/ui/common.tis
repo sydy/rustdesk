@@ -122,13 +122,6 @@ function adjustBorder() {
         }
         return;
     }
-    // 在Windows平台上，始终隐藏工具栏（除了文件传输和端口转发）
-    if (is_win && !is_file_transfer && !is_port_forward) {
-        $(header).style.set {
-            display: "none",
-        };
-        // 继续执行边框调整逻辑，但不显示工具栏
-    }
     if (view.windowState == view.WINDOW_MAXIMIZED) {
         self.style.set {
             border: "window-frame-width solid transparent",

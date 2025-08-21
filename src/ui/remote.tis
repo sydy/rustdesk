@@ -147,8 +147,7 @@ function handler.onMouse(evt)
 {
     is_mouse_event_triggered = true;
     if (is_file_transfer || is_port_forward) return false;
-    // 在Windows平台上禁用工具栏自动弹出功能
-    if (view.windowState == View.WINDOW_FULL_SCREEN && !dragging && !is_win) {
+    if (view.windowState == View.WINDOW_FULL_SCREEN && !dragging) {
         var dy = evt.y - scroll_body.scroll(#top);
         if (dy <= 1) {
             if (!wait_window_toolbar) {
