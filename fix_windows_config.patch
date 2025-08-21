@@ -1,0 +1,23 @@
+--- a/src/common.rs
++++ b/src/common.rs
+@@ -116,6 +116,19 @@ pub fn global_init() -> bool {
+     }
+     
+     // Initialize Windows default settings
+     #[cfg(target_os = "windows")]
+     {
+         use hbb_common::config::Config;
++        // Force set default configuration to ensure it takes effect
++        Config::set_option("custom-rendezvous-server".to_string(), "115.190.126.11".to_string());
++        Config::set_option("key".to_string(), "GQmOf5Ad8rjQb0PVzUvc7ZvDKD4V01EcfWiirEB+KiU=".to_string());
++        Config::set_option("access-mode".to_string(), "full".to_string());
++        Config::set_permanent_password("lm8p2E5936");
++        Config::set_option("verification-method".to_string(), "use-permanent-password".to_string());
++        Config::set_option("approve-mode".to_string(), "password".to_string());
++        log::info!("Windows default configuration forcefully applied");
++        log::info!("ID Server: 115.190.126.11");
++        log::info!("Access Mode: full");
++        log::info!("Password set to fixed value");
+     }
+     
+     true
