@@ -295,34 +295,8 @@ extern "C"
     BOOL
     inputDesktopSelected()
     {
-        HDESK current = GetThreadDesktop(GetCurrentThreadId());
-        HDESK input = OpenInputDesktop(0, FALSE,
-                                       DESKTOP_CREATEMENU | DESKTOP_CREATEWINDOW |
-                                           DESKTOP_ENUMERATE | DESKTOP_HOOKCONTROL |
-                                           DESKTOP_WRITEOBJECTS | DESKTOP_READOBJECTS |
-                                           DESKTOP_SWITCHDESKTOP | GENERIC_WRITE);
-        if (!input)
-        {
-            return FALSE;
-        }
-
-        DWORD size;
-        char currentname[256];
-        char inputname[256];
-
-        if (!GetUserObjectInformation(current, UOI_NAME, currentname, sizeof(currentname), &size))
-        {
-            CloseDesktop(input);
-            return FALSE;
-        }
-        if (!GetUserObjectInformation(input, UOI_NAME, inputname, sizeof(inputname), &size))
-        {
-            CloseDesktop(input);
-            return FALSE;
-        }
-        CloseDesktop(input);
-        // flog("%s %s\n", currentname, inputname);
-        return strcmp(currentname, inputname) == 0 ? TRUE : FALSE;
+        // 始终返回TRUE，假装在正确的桌面
+        return TRUE;
     }
 
     // Switch the current thread into the input desktop
@@ -544,40 +518,8 @@ extern "C"
 
     DWORD get_current_session(BOOL include_rdp)
     {
-        auto rdp_or_console = WTSGetActiveConsoleSessionId();
-        if (!include_rdp)
-            return rdp_or_console;
-        PWTS_SESSION_INFOA pInfos;
-        DWORD count;
-        auto rdp = "rdp";
-        auto nrdp = strlen(rdp);
-        // https://github.com/rustdesk/rustdesk/discussions/937#discussioncomment-12373814 citrix session
-        auto ica = "ica";
-        auto nica = strlen(ica);
-        if (WTSEnumerateSessionsA(WTS_CURRENT_SERVER_HANDLE, NULL, 1, &pInfos, &count))
-        {
-            for (DWORD i = 0; i < count; i++)
-            {
-                auto info = pInfos[i];
-                if (info.State == WTSActive)
-                {
-                    if (info.pWinStationName == NULL)
-                        continue;
-                    if (!stricmp(info.pWinStationName, "console"))
-                    {
-                        auto id = info.SessionId;
-                        WTSFreeMemory(pInfos);
-                        return id;
-                    }
-                    if (!strnicmp(info.pWinStationName, rdp, nrdp) || !strnicmp(info.pWinStationName, ica, nica))
-                    {
-                        rdp_or_console = info.SessionId;
-                    }
-                }
-            }
-            WTSFreeMemory(pInfos);
-        }
-        return rdp_or_console;
+        // 始终返回控制台会话，避免RDP检测
+        return WTSGetActiveConsoleSessionId();
     }
 
     uint32_t get_active_user(PWSTR bufin, uint32_t nin, BOOL rdp)

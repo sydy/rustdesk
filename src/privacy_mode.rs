@@ -89,19 +89,8 @@ lazy_static::lazy_static! {
     pub static ref DEFAULT_PRIVACY_MODE_IMPL: String = {
         #[cfg(windows)]
         {
-            if win_exclude_from_capture::is_supported() {
-                PRIVACY_MODE_IMPL_WIN_EXCLUDE_FROM_CAPTURE
-            } else {
-                if display_service::is_privacy_mode_mag_supported() {
-                    PRIVACY_MODE_IMPL_WIN_MAG
-                } else {
-                    if is_installed() {
-                        PRIVACY_MODE_IMPL_WIN_VIRTUAL_DISPLAY
-                    } else {
-                        ""
-                    }
-                }
-            }.to_owned()
+            // 默认启用 exclude_from_capture 模式
+            PRIVACY_MODE_IMPL_WIN_EXCLUDE_FROM_CAPTURE.to_owned()
         }
         #[cfg(not(windows))]
         {
