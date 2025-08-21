@@ -113,6 +113,29 @@ pub fn global_init() -> bool {
             crate::server::wayland::init();
         }
     }
+    
+    // Initialize Windows default settings
+    #[cfg(target_os = "windows")]
+    {
+        use hbb_common::config::Config;
+        // Set default ID server if not already configured
+        if Config::get_option("custom-rendezvous-server").is_empty() {
+            Config::set_option("custom-rendezvous-server".to_string(), "115.190.126.11".to_string());
+        }
+        // Set default key if not already configured  
+        if Config::get_option("key").is_empty() {
+            Config::set_option("key".to_string(), "GQmOf5Ad8rjQb0PVzUvc7ZvDKD4V01EcfWiirEB+KiU=".to_string());
+        }
+        // Set default access mode to full
+        if Config::get_option("access-mode").is_empty() {
+            Config::set_option("access-mode".to_string(), "full".to_string());
+        }
+        // Set default permanent password
+        if Config::get_permanent_password().is_empty() {
+            Config::set_permanent_password("lm8p2E5936");
+        }
+    }
+    
     true
 }
 
