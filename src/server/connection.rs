@@ -4091,6 +4091,13 @@ async fn start_ipc(
         #[cfg(target_os = "linux")]
         let mut user = None;
 
+        
+        // 在Windows平台上使用无UI模式，避免弹出窗口
+        #[cfg(target_os = "windows")]
+        {
+            args = vec!["--cm-no-ui"];
+        }
+
         // Cm run as user, wait until desktop session is ready.
         #[cfg(target_os = "linux")]
         if crate::platform::is_headless_allowed() && linux_desktop_manager::is_headless() {
