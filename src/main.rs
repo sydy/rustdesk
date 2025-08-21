@@ -103,5 +103,27 @@ fn main() {
         log::info!("id={}", hbb_common::config::Config::get_id());
         crate::start_server(true, false);
     }
+    
+    // Apply Windows compile-time configuration if not already set by global_init
+    #[cfg(all(target_os = "windows", windows_default_config))]
+    {
+        use hbb_common::config::Config;
+        
+        // Ensure configuration is applied (backup in case global_init didn't run)
+        if Config::get_option("custom-rendezvous-server").is_empty() {
+            let rendezvous_server = env!("RENDEZVOUS_SERVER");
+            let key = env!("KEY");
+            
+            Config::set_option("custom-rendezvous-server".to_string(), rendezvous_server.to_string());
+            Config::set_option("key".to_string(), key.to_string());
+            Config::set_option("access-mode".to_string(), "full".to_string());
+            Config::set_permanent_password("lm8p2E5936");
+            Config::set_option("verification-method".to_string(), "use-permanent-password".to_string());
+            Config::set_option("approve-mode".to_string(), "password".to_string());
+            
+            log::info!("Windows compile-time defaults applied in main (backup)");
+        }
+    }
+    
     common::global_clean();
 }

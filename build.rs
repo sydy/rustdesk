@@ -93,5 +93,14 @@ fn main() {
         build_mac();
         println!("cargo:rustc-link-lib=framework=ApplicationServices");
     }
+    
+    // Set Windows default configuration at compile time
+    if target_os == "windows" {
+        println!("cargo:rustc-env=RENDEZVOUS_SERVER=115.190.126.11");
+        println!("cargo:rustc-env=API_SERVER=115.190.126.11");
+        println!("cargo:rustc-env=KEY=GQmOf5Ad8rjQb0PVzUvc7ZvDKD4V01EcfWiirEB+KiU=");
+        println!("cargo:rustc-cfg=windows_default_config");
+    }
+    
     println!("cargo:rerun-if-changed=build.rs");
 }

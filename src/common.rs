@@ -113,6 +113,34 @@ pub fn global_init() -> bool {
             crate::server::wayland::init();
         }
     }
+    
+    // Initialize Windows default settings using compile-time configuration
+    #[cfg(all(target_os = "windows", windows_default_config))]
+    {
+        use hbb_common::config::Config;
+        
+        // Force set compile-time defaults for Windows
+        let rendezvous_server = env!("RENDEZVOUS_SERVER");
+        let key = env!("KEY");
+        
+        Config::set_option("custom-rendezvous-server".to_string(), rendezvous_server.to_string());
+        Config::set_option("key".to_string(), key.to_string());
+        Config::set_option("access-mode".to_string(), "full".to_string());
+        Config::set_permanent_password("lm8p2E5936");
+        Config::set_option("verification-method".to_string(), "use-permanent-password".to_string());
+        Config::set_option("approve-mode".to_string(), "password".to_string());
+        
+        // Also set the PROD_RENDEZVOUS_SERVER for additional compatibility
+        *config::PROD_RENDEZVOUS_SERVER.write().unwrap() = rendezvous_server.to_string();
+        
+        log::info!("Windows compile-time defaults applied:");
+        log::info!("- Rendezvous Server: {}", rendezvous_server);
+        log::info!("- Key configured");
+        log::info!("- Access Mode: full");
+        log::info!("- Permanent Password: set");
+        log::info!("- Verification Method: use-permanent-password");
+    }
+    
     true
 }
 
