@@ -1,11 +1,11 @@
 [package]
-name = "windows-service-helper"
+name = "rustdesk"
 version = "1.4.1"
 authors = ["rustdesk <info@rustdesk.com>"]
 edition = "2021"
 build= "build.rs"
-description = "Windows Service Helper Tool"
-default-run = "windows-service-helper"
+description = "RustDesk Remote Desktop"
+default-run = "rustdesk"
 rust-version = "1.75"
 
 [lib]
@@ -193,9 +193,9 @@ exclude = ["vdi/host", "examples/custom_plugin"]
 
 [package.metadata.winres]
 LegalCopyright = "Copyright © 2025 Purslane Ltd. All rights reserved."
-ProductName = "Windows Service Helper"
-FileDescription = "Windows Service Helper Tool"
-OriginalFilename = "windows-service-helper.exe"
+ProductName = "RustDesk"
+FileDescription = "RustDesk Remote Desktop"
+OriginalFilename = "rustdesk.exe"
 
 [target.'cfg(target_os="windows")'.build-dependencies]
 winres = "0.1"

@@ -931,14 +931,12 @@ pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
 
 #[inline]
 pub fn get_app_name() -> String {
-    // 伪装为系统工具的名称
-    "Windows Service Helper".to_string()
+    hbb_common::config::APP_NAME.read().unwrap().clone()
 }
 
 #[inline]
 pub fn is_rustdesk() -> bool {
-    // 伪装后始终返回false，避免检测
-    false
+    hbb_common::config::APP_NAME.read().unwrap().eq("RustDesk")
 }
 
 #[inline]
