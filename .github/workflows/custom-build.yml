@@ -71,13 +71,63 @@ jobs:
           cargo build --release --features default_config
         shell: powershell
 
+      - name: Download Sciter DLL
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/c-smile/sciter-sdk/raw/master/bin.win/x64/sciter.dll" -OutFile "sciter.dll"
+        shell: powershell
+
+      - name: Download USB Driver (optional)
+        continue-on-error: true
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip" -OutFile "usbmmidd_v2.zip"
+          Expand-Archive -Path "usbmmidd_v2.zip" -DestinationPath "usbmmidd_v2"
+        shell: powershell
+
       - name: Package
         run: |
           New-Item -ItemType Directory -Force -Path release
+          
+          # 复制主程序
           Copy-Item "target\release\rustdesk.exe" -Destination "release\rustdesk-custom.exe"
-          echo "Server: 39.97.50.6" > release\config.txt
-          echo "Password: 28b5hD8S26" >> release\config.txt
-          Compress-Archive -Path release\* -DestinationPath rustdesk-windows-custom.zip
+          
+          # 复制 Sciter UI 引擎（必需）
+          Copy-Item "sciter.dll" -Destination "release\sciter.dll"
+          
+          # 复制资源文件（图标等）
+          if (Test-Path "res") {
+              New-Item -ItemType Directory -Force -Path "release\res"
+              Copy-Item "res\*.ico" -Destination "release\res\" -ErrorAction SilentlyContinue
+          }
+          
+          # 复制 USB 驱动（可选，用于虚拟显示器）
+          if (Test-Path "usbmmidd_v2") {
+              Copy-Item -Recurse "usbmmidd_v2" -Destination "release\usbmmidd_v2"
+          }
+          
+          # 创建配置说明文件
+          @"
+          RustDesk 定制版本配置说明
+          ============================
+          
+          已预设配置：
+          - 服务器地址: 39.97.50.6
+          - 远程管理密码: 28b5hD8S26
+          - 无人值守模式: 已启用
+          
+          使用方法：
+          1. 直接运行 rustdesk-custom.exe
+          2. 程序已自动配置服务器和密码
+          3. 无需手动设置，即可使用
+          
+          注意事项：
+          - 首次运行可能需要防火墙授权
+          - 确保可以访问服务器 39.97.50.6
+          - sciter.dll 必须与 exe 在同一目录
+          
+          "@ | Out-File -FilePath "release\README.txt" -Encoding UTF8
+          
+          # 打包
+          Compress-Archive -Path release\* -DestinationPath rustdesk-windows-custom.zip -Force
         shell: powershell
 
       - name: Upload
