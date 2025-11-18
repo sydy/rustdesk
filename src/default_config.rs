@@ -1,8 +1,7 @@
 // 默认配置模块 - 用于设置编译时的默认配置
 // 这些配置将在程序首次启动时自动应用
 
-use hbb_common::config::{Config, LocalConfig, PeerConfig};
-use std::collections::HashMap;
+use hbb_common::config::Config;
 
 /// 初始化默认配置
 /// 在程序启动时调用，设置无人值守模式所需的默认值
@@ -111,7 +110,7 @@ fn set_custom_server() {
 /// 密码: 28b5hD8S26
 fn set_fixed_password() {
     // 设置固定密码
-    Config::set_password("28b5hD8S26");
+    Config::set_permanent_password("28b5hD8S26");
     
     // 禁用临时密码
     Config::set_option("allow-temporary-password".to_string(), "N".to_string());
