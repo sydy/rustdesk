@@ -1,21 +1,22 @@
 name: Full Flutter CI
 
 on:
-  workflow_dispatch:
-  pull_request:
-    paths-ignore:
-    - "docs/**"
-    - "README.md"
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - ".github/**"
-      - "docs/**"
-      - "README.md"
-      - "res/**"
-      - "appimage/**"
-      - "flatpak/**"
+  workflow_dispatch:  # 保留手动触发
+  # 禁用自动触发（节省 Actions 额度）
+  # pull_request:
+  #   paths-ignore:
+  #   - "docs/**"
+  #   - "README.md"
+  # push:
+  #   branches:
+  #     - master
+  #   paths-ignore:
+  #     - ".github/**"
+  #     - "docs/**"
+  #     - "README.md"
+  #     - "res/**"
+  #     - "appimage/**"
+  #     - "flatpak/**"
 
 jobs:
   run-ci:

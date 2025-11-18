@@ -16,6 +16,8 @@ on:
 env:
   RUST_VERSION: "1.75"
   CARGO_TERM_COLOR: always
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+  VCPKG_COMMIT_ID: "120deac3062162151622ca4860575a33844ba10b"
 
 jobs:
   build-windows:
@@ -24,10 +26,34 @@ jobs:
     if: contains(fromJSON('["windows", "all"]'), github.event.inputs.build_target)
     
     steps:
+      - name: Export GitHub Actions cache
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Setup vcpkg
+        run: |
+          $VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          cd $VCPKG_ROOT
+          git fetch --unshallow
+          git checkout ${{ env.VCPKG_COMMIT_ID }}
+          .\bootstrap-vcpkg.bat
+          .\vcpkg.exe integrate install
+        shell: powershell
+
+      - name: Install vcpkg dependencies
+        run: |
+          $VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          cd $VCPKG_ROOT
+          .\vcpkg.exe install libvpx:x64-windows-static libyuv:x64-windows-static opus:x64-windows-static aom:x64-windows-static
+        shell: powershell
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@v1
@@ -38,7 +64,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build
-        run: cargo build --release --features default_config
+        env:
+          VCPKG_ROOT: C:\vcpkg
+        run: |
+          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          cargo build --release --features default_config
+        shell: powershell
 
       - name: Package
         run: |
