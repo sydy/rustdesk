@@ -63,12 +63,23 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v2
 
+      - name: Prepare UI Resources
+        run: |
+          # 将 Sciter UI 资源内嵌到代码中
+          python res/inline-sciter.py
+        shell: bash
+
       - name: Build
         env:
           VCPKG_ROOT: C:\vcpkg
         run: |
           $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
-          cargo build --release --features default_config
+          # 编译定制版 RustDesk
+          # inline: UI 资源内嵌
+          # hwcodec: 硬件编解码
+          # vram: 显存优化
+          # default_config: 预设配置
+          cargo build --release --features "inline,hwcodec,vram,default_config"
         shell: powershell
 
       - name: Download Sciter DLL
