@@ -76,10 +76,9 @@ jobs:
           $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
           # 编译定制版 RustDesk
           # inline: UI 资源内嵌
-          # hwcodec: 硬件编解码
-          # vram: 显存优化
           # default_config: 预设配置
-          cargo build --release --features "inline,hwcodec,vram,default_config"
+          # 注意：暂不启用 hwcodec 和 vram（需要 FFmpeg，编译时间长）
+          cargo build --release --features "inline,default_config"
         shell: powershell
 
       - name: Download Sciter DLL
