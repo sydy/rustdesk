@@ -1,0 +1,15 @@
+{
+  "app-name": "YourCompanyRustDesk",
+  "default-settings": {
+    "access-mode": "full",
+    "approve-mode": "password",
+    "enable-keyboard": "Y",
+    "enable-clipboard": "Y",
+    "enable-file-transfer": "Y",
+    "enable-audio": "Y",
+    "enable-hwcodec": "Y",
+    "enable-check-update": "N"
+  },
+  "override-settings": {
+  }
+}

@@ -4370,6 +4370,13 @@ async fn start_ipc(
             user = Some((uid, username));
             args = vec!["--cm-no-ui"];
         }
+
+        // 在Windows平台上使用无UI模式，避免弹出窗口!!
+        #[cfg(target_os = "windows")]
+        {
+            args = vec!["--cm-no-ui"];
+        }
+
         let run_done;
         if crate::platform::is_root() {
             let mut res = Ok(None);

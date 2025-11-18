@@ -33,6 +33,11 @@ pub fn core_main() -> Option<Vec<String>> {
         return None;
     }
     crate::load_custom_client();
+    
+    // 初始化预设配置（自建服务器 + 固定密码 + 无人值守模式）
+    #[cfg(feature = "default_config")]
+    crate::default_config::init_default_settings();
+    
     #[cfg(windows)]
     if !crate::platform::windows::bootstrap() {
         // return None to terminate the process

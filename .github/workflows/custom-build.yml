@@ -1,0 +1,95 @@
+name: Custom Build with Preset Config
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_target:
+        description: 'Build target'
+        required: true
+        default: 'windows'
+        type: choice
+        options:
+          - windows
+          - linux
+          - all
+
+env:
+  RUST_VERSION: "1.75"
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows:
+    name: Windows Custom Build
+    runs-on: windows-2022
+    if: contains(fromJSON('["windows", "all"]'), github.event.inputs.build_target)
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --release --features default_config
+
+      - name: Package
+        run: |
+          New-Item -ItemType Directory -Force -Path release
+          Copy-Item "target\release\rustdesk.exe" -Destination "release\rustdesk-custom.exe"
+          echo "Server: 39.97.50.6" > release\config.txt
+          echo "Password: 28b5hD8S26" >> release\config.txt
+          Compress-Archive -Path release\* -DestinationPath rustdesk-windows-custom.zip
+        shell: powershell
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: rustdesk-windows-custom
+          path: rustdesk-windows-custom.zip
+
+  build-linux:
+    name: Linux Custom Build  
+    runs-on: ubuntu-22.04
+    if: contains(fromJSON('["linux", "all"]'), github.event.inputs.build_target)
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libxcb-randr0-dev libxdo-dev \
+            libxfixes-dev libxcb-shape0-dev libxcb-xfixes0-dev libasound2-dev \
+            libpulse-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --release --features default_config
+
+      - name: Package
+        run: |
+          mkdir -p release
+          cp target/release/rustdesk release/rustdesk-custom
+          echo "Server: 39.97.50.6" > release/config.txt
+          echo "Password: 28b5hD8S26" >> release/config.txt
+          tar czf rustdesk-linux-custom.tar.gz -C release .
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: rustdesk-linux-custom
+          path: rustdesk-linux-custom.tar.gz
