@@ -1,7 +1,7 @@
 // 默认配置模块 - 用于设置编译时的默认配置
 // 这些配置将在程序首次启动时自动应用
 
-use hbb_common::config::Config;
+use hbb_common::{config::Config, log};
 
 /// 初始化默认配置
 /// 在程序启动时调用，设置无人值守模式所需的默认值
