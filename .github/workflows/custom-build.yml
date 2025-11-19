@@ -77,8 +77,13 @@ jobs:
           # 编译定制版 RustDesk
           # inline: UI 资源内嵌
           # default_config: 预设配置
+          # --bins: 编译所有二进制文件（包括服务组件，确保可以安装 Windows 服务）
           # 注意：暂不启用 hwcodec 和 vram（需要 FFmpeg，编译时间长）
-          cargo build --release --features "inline,default_config"
+          cargo build --release --features "inline,default_config" --bins
+          
+          # 检查生成的文件
+          Write-Host "Generated binaries:"
+          Get-ChildItem target\release\*.exe | Select-Object Name, Length
         shell: powershell
 
       - name: Download Sciter DLL
@@ -97,8 +102,18 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path release
           
-          # 复制主程序
+          # 复制主程序（必需）
           Copy-Item "target\release\rustdesk.exe" -Destination "release\rustdesk-custom.exe"
+          
+          # 复制其他二进制文件（如果存在，用于服务功能）
+          if (Test-Path "target\release\naming.exe") {
+              Copy-Item "target\release\naming.exe" -Destination "release\naming.exe"
+              Write-Host "✅ Copied naming.exe"
+          }
+          if (Test-Path "target\release\service.exe") {
+              Copy-Item "target\release\service.exe" -Destination "release\service.exe"
+              Write-Host "✅ Copied service.exe"
+          }
           
           # 复制 Sciter UI 引擎（必需）
           Copy-Item "sciter.dll" -Destination "release\sciter.dll"
@@ -120,7 +135,7 @@ jobs:
           ============================
           
           已预设配置：
-          - 服务器地址: 39.97.50.6
+          - 服务器地址: 101.201.54.65
           - 远程管理密码: 28b5hD8S26
           - 无人值守模式: 已启用
           
@@ -129,10 +144,16 @@ jobs:
           2. 程序已自动配置服务器和密码
           3. 无需手动设置，即可使用
           
+          安装为 Windows 服务：
+          - 右键"以管理员身份运行" rustdesk-custom.exe
+          - 在界面中点击"设置" → "安装服务"
+          - 或使用命令: rustdesk-custom.exe --install-service
+          
           注意事项：
           - 首次运行可能需要防火墙授权
-          - 确保可以访问服务器 39.97.50.6
+          - 确保可以访问服务器 101.201.54.65
           - sciter.dll 必须与 exe 在同一目录
+          - 安装服务需要管理员权限
           
           "@ | Out-File -FilePath "release\README.txt" -Encoding UTF8
           
@@ -173,14 +194,40 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build
-        run: cargo build --release --features default_config
+        run: |
+          # 编译所有二进制文件，确保服务功能正常
+          cargo build --release --features default_config --bins
+          
+          # 检查生成的文件
+          echo "Generated binaries:"
+          ls -lh target/release/rustdesk target/release/naming target/release/service 2>/dev/null || true
 
       - name: Package
         run: |
           mkdir -p release
           cp target/release/rustdesk release/rustdesk-custom
-          echo "Server: 39.97.50.6" > release/config.txt
-          echo "Password: 28b5hD8S26" >> release/config.txt
+          
+          # 创建配置说明（配置已内嵌到程序中）
+          cat > release/README.txt << 'EOF'
+          RustDesk 定制版 - Linux
+          ======================
+          
+          已预设配置：
+          - 服务器地址: 101.201.54.65
+          - 固定密码: 28b5hD8S26
+          - 无人值守模式: 已启用
+          
+          使用方法：
+          1. chmod +x rustdesk-custom
+          2. ./rustdesk-custom
+          
+          安装为系统服务：
+          sudo ./rustdesk-custom --install-service
+          
+          卸载服务：
+          sudo ./rustdesk-custom --uninstall-service
+          EOF
+          
           tar czf rustdesk-linux-custom.tar.gz -C release .
 
       - name: Upload
