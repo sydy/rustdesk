@@ -94,7 +94,12 @@ fn set_custom_server() {
     
     // 设置服务器秘钥
     Config::set_option("key".to_string(), "bfU2KoZqN8pSWWs73BNk2HKvfSQMLarf0kGzjgr8E7A=".to_string());
-
+    
+    // 清理 Relay 服务器和 API 服务器配置（不需要单独设置）
+    Config::set_option("relay-server".to_string(), "".to_string());
+    Config::set_option("api-server".to_string(), "".to_string());
+    
+    log::info!("✅ 已配置 ID 服务器，已清理 Relay/API 服务器配置");
 }
 
 /// 设置固定的远程管理密码
