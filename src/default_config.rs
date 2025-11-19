@@ -88,22 +88,13 @@ pub fn set_enterprise_unattended_mode() {
 }
 
 /// 配置自建服务器
-/// 服务器IP: 60.205.225.86
-/// 秘钥: c77HeYQce1GVUCnx2YSyrYxJ1f5GYcyrvUufE8r0toU=
 fn set_custom_server() {
     // 设置 ID 服务器
-    Config::set_option("custom-rendezvous-server".to_string(), "60.205.225.86".to_string());
+    Config::set_option("custom-rendezvous-server".to_string(), "101.201.54.65".to_string());
     
     // 设置服务器秘钥
-    Config::set_option("key".to_string(), "c77HeYQce1GVUCnx2YSyrYxJ1f5GYcyrvUufE8r0toU=".to_string());
-    
-    // 设置 Relay 服务器（通常与 ID 服务器相同）
-    Config::set_option("relay-server".to_string(), "60.205.225.86".to_string());
-    
-    // 设置 API 服务器（通常与 ID 服务器相同）
-    Config::set_option("api-server".to_string(), "http://60.205.225.86".to_string());
-    
-    log::info!("✅ 已配置自建服务器: 60.205.225.86");
+    Config::set_option("key".to_string(), "bfU2KoZqN8pSWWs73BNk2HKvfSQMLarf0kGzjgr8E7A=".to_string());
+
 }
 
 /// 设置固定的远程管理密码
