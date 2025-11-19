@@ -103,7 +103,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path release
           
           # 复制主程序（必需）
-          Copy-Item "target\release\rustdesk.exe" -Destination "release\rustdesk-custom.exe"
+          Copy-Item "target\release\rustdesk.exe" -Destination "release\rustdesk.exe"
           
           # 复制其他二进制文件（如果存在，用于服务功能）
           if (Test-Path "target\release\naming.exe") {
@@ -140,14 +140,14 @@ jobs:
           - 无人值守模式: 已启用
           
           使用方法：
-          1. 直接运行 rustdesk-custom.exe
+          1. 直接运行 rustdesk.exe
           2. 程序已自动配置服务器和密码
           3. 无需手动设置，即可使用
           
           安装为 Windows 服务：
-          - 右键"以管理员身份运行" rustdesk-custom.exe
+          - 右键"以管理员身份运行" rustdesk.exe
           - 在界面中点击"设置" → "安装服务"
-          - 或使用命令: rustdesk-custom.exe --install-service
+          - 或使用命令: rustdesk.exe --install-service
           
           注意事项：
           - 首次运行可能需要防火墙授权
@@ -157,15 +157,38 @@ jobs:
           
           "@ | Out-File -FilePath "release\README.txt" -Encoding UTF8
           
-          # 打包
-          Compress-Archive -Path release\* -DestinationPath rustdesk-windows-custom.zip -Force
+          # 生成自解压可执行文件（类似 Flutter Tag Build）
+          Write-Host "生成自解压可执行文件..."
+          
+          # 处理 manifest 文件（移除 dpiAware 配置，避免兼容性问题）
+          bash -c "sed -i '/dpiAware/d' res/manifest.xml"
+          
+          # 调用 portable packer 生成器
+          bash -c "pushd ./libs/portable && pip3 install -r requirements.txt && python3 ./generate.py -f ../../release/ -o . -e ../../release/rustdesk.exe && popd"
+          
+          # 移动生成的自解压文件到输出目录
+          New-Item -ItemType Directory -Force -Path SignOutput
+          Move-Item "target\release\rustdesk-portable-packer.exe" "SignOutput\rustdesk-custom.exe"
+          
+          # 同时生成 zip 备份（可选）
+          Compress-Archive -Path release\* -DestinationPath SignOutput\rustdesk-windows-custom.zip -Force
+          
+          Write-Host "✅ 生成完成："
+          Write-Host "  - 自解压 exe: SignOutput\rustdesk-custom.exe"
+          Write-Host "  - zip 备份: SignOutput\rustdesk-windows-custom.zip"
         shell: powershell
 
-      - name: Upload
+      - name: Upload Self-Extracted Executable
         uses: actions/upload-artifact@v4
         with:
-          name: rustdesk-windows-custom
-          path: rustdesk-windows-custom.zip
+          name: rustdesk-windows-custom-exe
+          path: SignOutput/rustdesk-custom.exe
+      
+      - name: Upload Zip Backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: rustdesk-windows-custom-zip
+          path: SignOutput/rustdesk-windows-custom.zip
 
   build-linux:
     name: Linux Custom Build  
